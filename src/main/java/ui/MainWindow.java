@@ -133,6 +133,10 @@ public class MainWindow extends Application {
         loadButton.setFont(font);
         AnchorPane.setTopAnchor(loadButton, 360.0);
         AnchorPane.setLeftAnchor(loadButton, 370.0);
+        loadButton.setOnAction(event -> {
+            this.cities = controller.parseData("src/main/resources/csv/file.csv");
+            createTablePage();
+        });
 
         ToggleGroup modeGroup = new ToggleGroup();
 
@@ -158,20 +162,18 @@ public class MainWindow extends Application {
             if (!text.equals("")) {
                 List<String> cities = List.of(text.split(SEMICOLON));
                 if (firstMode.isSelected()) {
-                    createTablePage(cities, 1);
+                    this.cities = controller.parseData(cities, 1);
+                    createTablePage();
                 } else {
-                    createTablePage(cities, 2);
+                    this.cities = controller.parseData(cities, 2);
+                    createTablePage();
                 }
             }
         });
     }
 
-    private void createTablePage(List<String> cities, int mode) {
+    private void createTablePage() {
         stage.setResizable(true);
-
-        this.cities = controller.parseData(cities, mode);
-
-        System.out.println(this.cities);
 
         Font font = createFont(14);
 

@@ -4,7 +4,6 @@ import entity.Table;
 import parser.*;
 import parser.Parser;
 import reader.Reader;
-import stemmer.entity.StemmerEntity;
 import writer.ScsTableWriter;
 import writer.*;
 
@@ -19,7 +18,8 @@ import static entity.Table.Name;
 public class CityController implements Controller {
     private static final String NAME;
     private static final String COLUMN_FILE;
-    private static Parser parser;
+    private static Parser cityParser;
+    private static Parser csvParser;
     private static TableWriter writer;
     private static Reader reader;
     private static List<Name> fixColumns;
@@ -32,11 +32,20 @@ public class CityController implements Controller {
     private Table table;
 
     @Override
-    public Map<String, String> parseData(List<String> cities, int mode) {
-        if (parser == null) {
-            parser = new CityParser();
+    public Map<String, String> parseData(String fileName) {
+        if (csvParser == null) {
+            csvParser = new CSVParser();
         }
-        table = parser.parse(cities);
+        table = csvParser.parse(fileName);
+        return getMap();
+    }
+
+    @Override
+    public Map<String, String> parseData(List<String> cities, int mode) {
+        if (cityParser == null) {
+            cityParser = new CityParser();
+        }
+        table = cityParser.parse(cities);
         if (mode == 1) {
             if (fixColumns == null) {
                 getFixColumns();
@@ -50,15 +59,7 @@ public class CityController implements Controller {
                 }
             }
         }
-        Map<String, String> result = new HashMap<>();
-        for (Row row : table.getAllRows()) {
-            String id = row.getId();
-            String city = row.getValue(NAME);
-            if (!city.equals("")) {
-                result.put(city, id);
-            }
-        }
-        return result;
+        return getMap();
     }
 
     @Override
@@ -71,6 +72,21 @@ public class CityController implements Controller {
         if (writer == null)
             writer = new ScsTableWriter();
         writer.write(table);
+    }
+
+    private Map<String, String> getMap() {
+        Map<String, String> result = null;
+        if (table != null) {
+            result = new HashMap<>();
+            for (Row row : table.getAllRows()) {
+                String id = row.getId();
+                String city = row.getValue(NAME);
+                if (!city.equals("")) {
+                    result.put(city, id);
+                }
+            }
+        }
+        return result;
     }
 
     private static void getFixColumns() {
